@@ -1,0 +1,6 @@
+# Dev
+.env
+._*
+
+# Volumes
+**/*.volume/
