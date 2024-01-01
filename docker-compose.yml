@@ -2,17 +2,26 @@ name: tnhsr
 services:
   db:
     build:
-      context: ./deploy/db
       args:
-        admin_psw: ${DB_ADMIN_PSW}
-        admin_user: ${DB_ADMIN_USER}
-        name: ${DB_DBNAME}
-        root_psw: ${DB_ROOT_PSW}
+        db_admin_psw: ${DB_ADMIN_PSW}
+        db_admin_user: ${DB_ADMIN_USER}
+        db_name: ${DB_NAME}
+        db_root_psw: ${DB_ROOT_PSW}
+      context: .
+      dockerfile: ./deploy/db/Dockerfile
     command: --authentication_policy=*
     ports:
       - "127.0.0.1:3306:3306"
     volumes:
       - ${DB_VOL_PATH}:/var/lib/mysql
+  server:
+    build:
+      args:
+        db_psw: ${DB_ADMIN_PSW}
+        db_user: ${DB_ADMIN_USER}
+        db_name: ${DB_NAME}
+      context: .
+      dockerfile: ./deploy/server/Dockerfile
 volumes:
   db-data:
     driver: local

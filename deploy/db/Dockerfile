@@ -1,16 +1,16 @@
 FROM mysql:latest
 
-ARG admin_psw
-ARG admin_user
-ARG name
-ARG root_psw
+ARG db_admin_psw
+ARG db_admin_user
+ARG db_name
+ARG db_root_psw
 
 # Admin will be granted superuser permissions on the created database.
-ENV MYSQL_DATABASE=$name
-ENV MYSQL_PASSWORD=$admin_psw
-ENV MYSQL_ROOT_PASSWORD=$root_psw
-ENV MYSQL_USER=$admin_user
+ENV MYSQL_DATABASE=$db_name
+ENV MYSQL_PASSWORD=$db_admin_psw
+ENV MYSQL_ROOT_PASSWORD=$db_root_psw
+ENV MYSQL_USER=$db_admin_user
 
-COPY ./setup.sql /docker-entrypoint-initdb.d
+COPY ./deploy/db/setup.sql /docker-entrypoint-initdb.d
 
 EXPOSE 3306
