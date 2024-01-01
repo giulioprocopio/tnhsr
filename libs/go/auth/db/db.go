@@ -12,7 +12,12 @@ type DSN struct {
 }
 
 func (dsn DSN) String() string {
-	s := dsn.Username + ":" + dsn.Password + "@" + dsn.Protocol + "(" + dsn.Address + ")/" + dsn.Database
+	s := dsn.Username +
+		":" + dsn.Password +
+		"@" + dsn.Protocol +
+		"(" + dsn.Address +
+		")/" + dsn.Database
+
 	if dsn.Options != nil {
 		s += "?"
 		for k, v := range dsn.Options {
@@ -20,6 +25,7 @@ func (dsn DSN) String() string {
 		}
 		s = s[:len(s)-1]
 	}
+
 	return s
 }
 
