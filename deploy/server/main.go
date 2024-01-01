@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"local/libs/auth/db"
 	"os"
+	"time"
 )
 
 func main() {
-	var tnhsrDB db.DB
+	tnhsrDB := &db.DB{}
 
 	tnhsrDB.DSN = db.DSN{
 		Username: os.Getenv("DB_USER"),
@@ -18,14 +19,22 @@ func main() {
 	}
 
 	fmt.Printf("DSN: %s\n", tnhsrDB.DSN.String())
+
 	err := tnhsrDB.Open()
 	if err != nil {
 		panic(err)
 	}
-
 	defer tnhsrDB.Close()
 
 	for {
-		// Do nothing.
+		err = tnhsrDB.Ping()
+		if err != nil {
+			panic(err)
+		} else {
+			fmt.Println("Ping OK")
+		}
+
+		// Delay 1 second.
+		time.Sleep(5 * time.Second)
 	}
 }

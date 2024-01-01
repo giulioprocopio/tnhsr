@@ -44,6 +44,10 @@ func (db *DB) Open() error {
 	return nil
 }
 
+func (db *DB) Ping() error {
+	return db.db.Ping()
+}
+
 func (db *DB) Close() error {
 	return db.db.Close()
 }
