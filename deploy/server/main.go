@@ -29,7 +29,7 @@ func main() {
 	for {
 		err = tnhsrDB.Ping()
 		if err != nil {
-			panic(err)
+			fmt.Printf("Ping failed: %s\n", err.Error())
 		} else {
 			fmt.Println("Ping OK")
 		}
