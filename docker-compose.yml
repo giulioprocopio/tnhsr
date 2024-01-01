@@ -2,11 +2,11 @@ name: tnhsr
 services:
   db:
     build:
-      context: ./db
+      context: ./deploy/db
       args:
         admin_psw: ${DB_ADMIN_PSW}
         admin_user: ${DB_ADMIN_USER}
-        name: ${DB_NAME}
+        name: ${DB_DBNAME}
         root_psw: ${DB_ROOT_PSW}
     command: --authentication_policy=*
     ports:
