@@ -35,6 +35,6 @@ func main() {
 		}
 
 		// Delay 1 second.
-		time.Sleep(5 * time.Second)
+		time.Sleep(time.Second)
 	}
 }
