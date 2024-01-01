@@ -14,7 +14,7 @@ func main() {
 		Username: os.Getenv("DB_USER"),
 		Password: os.Getenv("DB_PSW"),
 		Protocol: "tcp",
-		Address:  "localhost:3306",
+		Address:  "host.docker.internal:3306",
 		Database: os.Getenv("DB_NAME"),
 	}
 
