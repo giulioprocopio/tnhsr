@@ -18,7 +18,7 @@ func (dsn DSN) String() string {
 		"(" + dsn.Address +
 		")/" + dsn.Database
 
-	if dsn.Options != nil {
+	if dsn.Options != nil && len(dsn.Options) > 0 {
 		s += "?"
 		for k, v := range dsn.Options {
 			s += k + "=" + v + "&"
