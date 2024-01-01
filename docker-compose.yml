@@ -13,6 +13,7 @@ services:
       context: .
       dockerfile: ./deploy/db/Dockerfile
     command: --authentication_policy=*
+    hostname: db
     networks:
       - internal
     ports:
@@ -22,11 +23,13 @@ services:
   server:
     build:
       args:
+        db_addr: db:3306
         db_psw: ${DB_ADMIN_PSW}
         db_user: ${DB_ADMIN_USER}
         db_name: ${DB_NAME}
       context: .
       dockerfile: ./deploy/server/Dockerfile
+    hostname: server
     networks:
       - internal
     depends_on:
