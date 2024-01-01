@@ -1,6 +1,6 @@
 name: tnhsr
 networks:
-  db-net:
+  internal:
     driver: bridge
 services:
   db:
@@ -14,9 +14,9 @@ services:
       dockerfile: ./deploy/db/Dockerfile
     command: --authentication_policy=*
     networks:
-      - db-net
+      - internal
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     volumes:
       - ${DB_VOL_PATH}:/var/lib/mysql
   server:
@@ -28,7 +28,7 @@ services:
       context: .
       dockerfile: ./deploy/server/Dockerfile
     networks:
-      - db-net
+      - internal
     depends_on:
       - db
 volumes:
