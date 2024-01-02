@@ -36,24 +36,24 @@ def main():
     errno = 0
 
     env_sample = dict(iter_env_file(ENV_SAMPLE))
-    print('Must set: ', end='')
+    print('must set: ', end='')
     print(', '.join(env_sample.keys()))
 
     env = {}
     for path in iter_env_files_paths():
-        print(f'Reading {path.relative_to(DIR)}')
+        print(f'reading {path.relative_to(DIR)}')
         env.update(iter_env_file(path))
 
-    print('Reading current env')
+    print('reading current env')
     env.update(os.environ)
 
     for key, _ in env_sample.items():
         if key not in env:
-            print(f'Error: `{key}` is not set.')
+            print(f'error: `{key}` is not set')
             errno = 1
     else:
         if errno == 0:
-            print('All env vars are set.')
+            print('all env vars are set')
 
     return errno
 
