@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"local/libs/dbutils"
+	"local/libs/dbconn"
 	"os"
 	"time"
 )
 
 func main() {
-	conn := dbutils.NewConn()
+	conn := dbconn.NewConn()
 
 	conn.DSN.Username = os.Getenv("DB_USER")
 	conn.DSN.Password = os.Getenv("DB_PSW")

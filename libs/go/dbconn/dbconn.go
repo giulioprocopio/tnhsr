@@ -1,4 +1,4 @@
-package dbutils
+package dbconn
 
 import (
 	"context"

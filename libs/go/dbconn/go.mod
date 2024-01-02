@@ -1,4 +1,4 @@
-module local/libs/dbutils
+module local/libs/dbconn
 
 go 1.21.5
 
