@@ -35,6 +35,7 @@ def iter_env_files_paths():
 def main():
     errno = 0
 
+    assert ENV_SAMPLE.exists()
     env_sample = dict(iter_env_file(ENV_SAMPLE))
     print('must set: ', end='')
     print(', '.join(env_sample.keys()))
