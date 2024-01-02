@@ -26,8 +26,11 @@ func main() {
 	defer conn.Close()
 
 	fmt.Println("waiting for database...")
-	conn.Wait(time.Second * 5)
-	fmt.Println("database available")
+	err = conn.Wait(time.Second * 5)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("database is ready")
 
 	version, err := conn.Version()
 	if err != nil {
@@ -41,7 +44,7 @@ func main() {
 
 		err = conn.Ping()
 		if err != nil {
-			fmt.Printf("ping failed: %s", err.Error())
+			fmt.Printf("ping failed: %s\n", err.Error())
 		} else {
 			fmt.Println("OK")
 		}
