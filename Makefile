@@ -1,6 +1,7 @@
 .PHONY: up down down-rm
 
 up:
+	python deploy_hook.py
 	docker-compose up -d --build --force-recreate
 
 down:
