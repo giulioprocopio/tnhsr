@@ -2,7 +2,7 @@
 
 up:
 	python deploy_hook.py
-	docker-compose up -d --build --force-recreate
+	docker-compose up -d
 
 down:
 	docker-compose down
