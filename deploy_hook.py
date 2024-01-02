@@ -3,9 +3,10 @@ import os
 from pathlib import Path
 
 DIR = Path(__file__).parent.absolute()
+ENV_SAMPLE = DIR / '.env.sample'
 
 
-def read_env_file(path):
+def iter_env_file(path):
     with open(path, 'r') as f:
         for line in f.readlines():
             # Comment or empty line.
@@ -23,22 +24,27 @@ def read_env_file(path):
             yield key, value
 
 
+def iter_env_files_paths():
+    for path in chain(DIR.glob('*.env'), DIR.glob('.env.*')):
+        if path == ENV_SAMPLE:
+            continue
+
+        yield path
+
+
 def main():
     errno = 0
 
-    env_sample = dict(read_env_file(DIR / '.env.sample'))
+    env_sample = dict(iter_env_file(ENV_SAMPLE))
     print('Must set: ', end='')
     print(', '.join(env_sample.keys()))
 
     env = {}
-    for path in chain(DIR.glob('*.env'), DIR.glob('.env.*')):
-        if path.name == '.env.sample':
-            continue
+    for path in iter_env_files_paths():
+        print(f'Reading {path.relative_to(DIR)}')
+        env.update(iter_env_file(path))
 
-        print(f'Reading {path}...')
-        env.update(read_env_file(path))
-
-    print('Reading current env...')
+    print('Reading current env')
     env.update(os.environ)
 
     for key, _ in env_sample.items():
