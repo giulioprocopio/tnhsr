@@ -1,4 +1,4 @@
-FROM mysql:latest
+FROM mysql:8.0
 
 ARG db_admin_psw
 ARG db_admin_user

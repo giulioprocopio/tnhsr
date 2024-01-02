@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:1.21
 
 ARG db_addr
 ARG db_psw
