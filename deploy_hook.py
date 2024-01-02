@@ -34,8 +34,11 @@ def main():
     for path in chain(DIR.glob('*.env'), DIR.glob('.env.*')):
         if path.name == '.env.sample':
             continue
+
+        print(f'Reading {path}...')
         env.update(read_env_file(path))
 
+    print('Reading current env...')
     env.update(os.environ)
 
     for key, _ in env_sample.items():
