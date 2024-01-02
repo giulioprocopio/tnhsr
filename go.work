@@ -2,5 +2,5 @@ go 1.21.5
 
 use (
 	./deploy/server
-	./libs/go/auth
+	./libs/go/dbutils
 )

@@ -1,4 +1,4 @@
-module local/libs/auth
+module local/libs/dbutils
 
 go 1.21.5
 

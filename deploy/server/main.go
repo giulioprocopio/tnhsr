@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
-	"local/libs/auth/db"
+	"local/libs/dbutils"
 	"os"
 	"time"
 )
 
 func main() {
-	tnhsr := &db.DB{}
+	conn := &dbutils.Conn{}
 
-	tnhsr.DSN = db.DSN{
+	conn.DSN = dbutils.DSN{
 		Username: os.Getenv("DB_USER"),
 		Password: os.Getenv("DB_PSW"),
 		Protocol: "tcp",
@@ -18,33 +18,38 @@ func main() {
 		Database: os.Getenv("DB_NAME"),
 	}
 
-	fmt.Printf("DSN: %s\n", tnhsr.DSN.String())
+	fmt.Printf("DSN is %s\n", conn.DSN.String())
 
-	err := tnhsr.Open()
+	err := conn.Open()
 	if err != nil {
 		panic(err)
 	}
-	defer tnhsr.Close()
+	defer conn.Close()
 
-	fmt.Println("Waiting for database...")
-	tnhsr.Wait(10)
-	fmt.Println("Database available")
+	fmt.Print("waiting for database...")
+	conn.Wait(10)
+	fmt.Println("\tdatabase available")
 
-	version, err := tnhsr.Version()
+	version, err := conn.Version()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("MySQL Version: %s\n", version)
+	fmt.Printf("using MySQL %s\n", version)
 
+	iter := 0
 	for {
-		err = tnhsr.Ping()
+		fmt.Printf("ping %d:\t", iter)
+
+		err = conn.Ping()
 		if err != nil {
-			fmt.Printf("Ping failed: %s\n", err.Error())
+			fmt.Printf("ping failed: %s", err.Error())
 		} else {
-			fmt.Println("Ping OK")
+			fmt.Println("OK")
 		}
 
 		// Delay 1 second.
 		time.Sleep(time.Second)
+		fmt.Printf("\033[1A\033[K") // Clear line
+		iter++
 	}
 }

@@ -1,4 +1,4 @@
-package db
+package dbutils
 
 import (
 	"database/sql"
@@ -36,13 +36,13 @@ func (dsn DSN) String() string {
 	return s
 }
 
-type DB struct {
+type Conn struct {
 	DB  *sql.DB
 	DSN DSN
 }
 
 // Open database connection.
-func (db *DB) Open() error {
+func (db *Conn) Open() error {
 	var err error
 	db.DB, err = sql.Open("mysql", db.DSN.String())
 	if err != nil {
@@ -53,12 +53,12 @@ func (db *DB) Open() error {
 }
 
 // Ping database.
-func (db *DB) Ping() error {
+func (db *Conn) Ping() error {
 	return db.DB.Ping()
 }
 
 // Ping until database is available.
-func (db *DB) Wait(timeout int) error {
+func (db *Conn) Wait(timeout int) error {
 	t := time.NewTicker(time.Second)
 	defer t.Stop()
 
@@ -77,7 +77,7 @@ func (db *DB) Wait(timeout int) error {
 }
 
 // Get database version string.
-func (db *DB) Version() (string, error) {
+func (db *Conn) Version() (string, error) {
 	var version string
 	err := db.DB.QueryRow("SELECT VERSION()").Scan(&version)
 	if err != nil {
@@ -87,13 +87,13 @@ func (db *DB) Version() (string, error) {
 	return version, nil
 }
 
-// Close database connection.  Preferably use `defer db.Close()` after
-// `db.Open()`.
-func (db *DB) Close() error {
+// Close database connection.  Preferably use `defer conn.Close()` after
+// `conn.Open()`.
+func (db *Conn) Close() error {
 	return db.DB.Close()
 }
 
-func (db *DB) ExecFileUnsafe(path string) error {
+func (db *Conn) ExecFileUnsafe(path string) error {
 	if db.DSN.Options == nil || db.DSN.Options["multiStatements"] != "true" {
 		return errors.New(
 			"DSN `multiStatements` option must be set to execute file")
