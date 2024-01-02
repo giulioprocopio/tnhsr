@@ -26,6 +26,16 @@ func main() {
 	}
 	defer tnhsrDB.Close()
 
+	fmt.Println("Waiting for database...")
+	tnhsrDB.Wait(10)
+	fmt.Println("Database available")
+
+	version, err := tnhsrDB.Version()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("MySQL Version: %s\n", version)
+
 	for {
 		err = tnhsrDB.Ping()
 		if err != nil {
