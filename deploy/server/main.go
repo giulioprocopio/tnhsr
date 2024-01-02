@@ -8,17 +8,16 @@ import (
 )
 
 func main() {
-	conn := &dbutils.Conn{}
+	conn := dbutils.NewConn()
 
-	conn.DSN = dbutils.DSN{
-		Username: os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PSW"),
-		Protocol: "tcp",
-		Address:  os.Getenv("DB_ADDR"),
-		Database: os.Getenv("DB_NAME"),
-	}
+	conn.DSN.Username = os.Getenv("DB_USER")
+	conn.DSN.Password = os.Getenv("DB_PSW")
+	conn.DSN.Protocol = "tcp"
+	conn.DSN.Address = os.Getenv("DB_ADDR")
+	conn.DSN.Database = os.Getenv("DB_NAME")
 
-	fmt.Printf("DSN is %s\n", conn.DSN.String())
+	str, _ := conn.DSN.String()
+	fmt.Printf("DSN is %s\n", str)
 
 	err := conn.Open()
 	if err != nil {
@@ -26,9 +25,9 @@ func main() {
 	}
 	defer conn.Close()
 
-	fmt.Print("waiting for database...")
-	conn.Wait(10)
-	fmt.Println("\tdatabase available")
+	fmt.Println("waiting for database...")
+	conn.Wait(time.Second * 5)
+	fmt.Println("database available")
 
 	version, err := conn.Version()
 	if err != nil {
@@ -49,7 +48,8 @@ func main() {
 
 		// Delay 1 second.
 		time.Sleep(time.Second)
-		fmt.Printf("\033[1A\033[K") // Clear line
+		// Clear line.
+		fmt.Printf("\033[1A\033[K")
 		iter++
 	}
 }

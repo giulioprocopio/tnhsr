@@ -1,8 +1,10 @@
 package dbutils
 
 import (
+	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"os"
 	"time"
 
@@ -16,9 +18,28 @@ type DSN struct {
 	Options                                         map[string]string
 }
 
+// Assert DSN is valid and ready to use.
+func (dsn DSN) Ready() error {
+	fields := map[string]string{
+		"username":      dsn.Username,
+		"password":      dsn.Password,
+		"protocol":      dsn.Protocol,
+		"address":       dsn.Address,
+		"database name": dsn.Database,
+	}
+
+	for field, value := range fields {
+		if value == "" {
+			return fmt.Errorf("DSN %s is required", field)
+		}
+	}
+
+	return nil
+}
+
 // Format DSN parameters to string:
 // <username>:<password>@<protocol>(<address>)/<database>?<param>=<value>.
-func (dsn DSN) String() string {
+func (dsn DSN) String() (string, error) {
 	s := dsn.Username +
 		":" + dsn.Password +
 		"@" + dsn.Protocol +
@@ -33,18 +54,41 @@ func (dsn DSN) String() string {
 		s = s[:len(s)-1]
 	}
 
-	return s
+	return s, dsn.Ready()
 }
 
 type Conn struct {
-	DB  *sql.DB
-	DSN DSN
+	DB      *sql.DB
+	DSN     DSN
+	Timeout time.Duration
+}
+
+func NewConn() *Conn {
+	conn := &Conn{
+		DSN: DSN{
+			Options: make(map[string]string),
+		},
+		Timeout: 5 * time.Second,
+	}
+
+	return conn
+}
+
+// Get timeout context and cancel function for database operations.
+func (conn *Conn) Context() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), conn.Timeout)
 }
 
 // Open database connection.
-func (db *Conn) Open() error {
+func (conn *Conn) Open() error {
 	var err error
-	db.DB, err = sql.Open("mysql", db.DSN.String())
+
+	str, err := conn.DSN.String()
+	if err != nil {
+		return err
+	}
+
+	conn.DB, err = sql.Open("mysql", str)
 	if err != nil {
 		return err
 	}
@@ -53,12 +97,26 @@ func (db *Conn) Open() error {
 }
 
 // Ping database.
-func (db *Conn) Ping() error {
-	return db.DB.Ping()
+func (conn *Conn) Ping() error {
+	ctx, cancel := conn.Context()
+	defer cancel()
+
+	err := conn.DB.PingContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// Ping until database is available.
-func (db *Conn) Wait(timeout int) error {
+// Check if database is available.
+func (conn *Conn) IsUp() (bool, error) {
+	err := conn.Ping()
+	return err == nil, err
+}
+
+// Ping until database it is available.
+func (conn *Conn) Wait(timeout time.Duration) error {
 	t := time.NewTicker(time.Second)
 	defer t.Stop()
 
@@ -66,20 +124,23 @@ func (db *Conn) Wait(timeout int) error {
 	for {
 		select {
 		case <-t.C:
-			err = db.Ping()
+			err = conn.Ping()
 			if err == nil {
 				return nil
 			}
-		case <-time.After(time.Duration(timeout) * time.Second):
+		case <-time.After(timeout):
 			return err
 		}
 	}
 }
 
 // Get database version string.
-func (db *Conn) Version() (string, error) {
+func (conn *Conn) Version() (string, error) {
+	ctx, cancel := conn.Context()
+	defer cancel()
+
 	var version string
-	err := db.DB.QueryRow("SELECT VERSION()").Scan(&version)
+	err := conn.DB.QueryRowContext(ctx, "SELECT VERSION()").Scan(&version)
 	if err != nil {
 		return "", err
 	}
@@ -89,12 +150,13 @@ func (db *Conn) Version() (string, error) {
 
 // Close database connection.  Preferably use `defer conn.Close()` after
 // `conn.Open()`.
-func (db *Conn) Close() error {
-	return db.DB.Close()
+func (conn *Conn) Close() error {
+	return conn.DB.Close()
 }
 
-func (db *Conn) ExecFileUnsafe(path string) error {
-	if db.DSN.Options == nil || db.DSN.Options["multiStatements"] != "true" {
+func (conn *Conn) ExecFileUnsafe(path string) error {
+	if conn.DSN.Options == nil ||
+		conn.DSN.Options["multiStatements"] != "true" {
 		return errors.New(
 			"DSN `multiStatements` option must be set to execute file")
 	}
@@ -105,7 +167,11 @@ func (db *Conn) ExecFileUnsafe(path string) error {
 	}
 
 	sql := string(content)
-	_, err = db.DB.Exec(sql)
+
+	ctx, cancel := conn.Context()
+	defer cancel()
+
+	_, err = conn.DB.ExecContext(ctx, sql)
 	if err != nil {
 		return err
 	}
