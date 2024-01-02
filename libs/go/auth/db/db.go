@@ -2,11 +2,15 @@ package db
 
 import (
 	"database/sql"
+	"errors"
+	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// Refer to [go-sql-driver/mysql][1] for more information about params spec.
+// [1]: https://github.com/go-sql-driver/mysql#parameters
 type DSN struct {
 	Username, Password, Protocol, Address, Database string
 	Options                                         map[string]string
@@ -87,4 +91,24 @@ func (db *DB) Version() (string, error) {
 // `db.Open()`.
 func (db *DB) Close() error {
 	return db.DB.Close()
+}
+
+func (db *DB) ExecFileUnsafe(path string) error {
+	if db.DSN.Options == nil || db.DSN.Options["multiStatements"] != "true" {
+		return errors.New(
+			"DSN `multiStatements` option must be set to execute file")
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	sql := string(content)
+	_, err = db.DB.Exec(sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
