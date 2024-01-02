@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	tnhsrDB := &db.DB{}
+	tnhsr := &db.DB{}
 
-	tnhsrDB.DSN = db.DSN{
+	tnhsr.DSN = db.DSN{
 		Username: os.Getenv("DB_USER"),
 		Password: os.Getenv("DB_PSW"),
 		Protocol: "tcp",
@@ -18,26 +18,26 @@ func main() {
 		Database: os.Getenv("DB_NAME"),
 	}
 
-	fmt.Printf("DSN: %s\n", tnhsrDB.DSN.String())
+	fmt.Printf("DSN: %s\n", tnhsr.DSN.String())
 
-	err := tnhsrDB.Open()
+	err := tnhsr.Open()
 	if err != nil {
 		panic(err)
 	}
-	defer tnhsrDB.Close()
+	defer tnhsr.Close()
 
 	fmt.Println("Waiting for database...")
-	tnhsrDB.Wait(10)
+	tnhsr.Wait(10)
 	fmt.Println("Database available")
 
-	version, err := tnhsrDB.Version()
+	version, err := tnhsr.Version()
 	if err != nil {
 		panic(err)
 	}
 	fmt.Printf("MySQL Version: %s\n", version)
 
 	for {
-		err = tnhsrDB.Ping()
+		err = tnhsr.Ping()
 		if err != nil {
 			fmt.Printf("Ping failed: %s\n", err.Error())
 		} else {

@@ -33,14 +33,14 @@ func (dsn DSN) String() string {
 }
 
 type DB struct {
-	db  *sql.DB
+	DB  *sql.DB
 	DSN DSN
 }
 
 // Open database connection.
 func (db *DB) Open() error {
 	var err error
-	db.db, err = sql.Open("mysql", db.DSN.String())
+	db.DB, err = sql.Open("mysql", db.DSN.String())
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (db *DB) Open() error {
 
 // Ping database.
 func (db *DB) Ping() error {
-	return db.db.Ping()
+	return db.DB.Ping()
 }
 
 // Ping until database is available.
@@ -75,7 +75,7 @@ func (db *DB) Wait(timeout int) error {
 // Get database version string.
 func (db *DB) Version() (string, error) {
 	var version string
-	err := db.db.QueryRow("SELECT VERSION()").Scan(&version)
+	err := db.DB.QueryRow("SELECT VERSION()").Scan(&version)
 	if err != nil {
 		return "", err
 	}
@@ -86,5 +86,5 @@ func (db *DB) Version() (string, error) {
 // Close database connection.  Preferably use `defer db.Close()` after
 // `db.Open()`.
 func (db *DB) Close() error {
-	return db.db.Close()
+	return db.DB.Close()
 }
