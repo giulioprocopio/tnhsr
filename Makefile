@@ -1,4 +1,4 @@
-.PHONY: up down down-rm
+.PHONY: up down rm
 
 up:
 	python deploy_hook.py
@@ -7,6 +7,6 @@ up:
 down:
 	docker-compose down
 
-down-rm:
+rm:
 	docker-compose down -v --rmi all
 	find . -name "*.volume" -type d -print0 | xargs -0 /bin/rm -rd
