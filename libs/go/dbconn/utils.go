@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func (conn *Conn) ExecFileUnsafe(path string) error {
+func (conn *Conn) ExecFileUnsafe(path string) (err error) {
 	if conn.DSN.Options == nil ||
 		conn.DSN.Options["multiStatements"] != "true" {
 		return errors.New(

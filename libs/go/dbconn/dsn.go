@@ -10,7 +10,7 @@ type DSN struct {
 }
 
 // Assert DSN is valid and ready to use.
-func (dsn DSN) Ready() error {
+func (dsn DSN) Ready() (err error) {
 	fields := map[string]string{
 		"username":      dsn.Username,
 		"password":      dsn.Password,
@@ -30,8 +30,8 @@ func (dsn DSN) Ready() error {
 
 // Format DSN parameters to string:
 // <username>:<password>@<protocol>(<address>)/<database>?<param>=<value>.
-func (dsn DSN) String() (string, error) {
-	s := dsn.Username +
+func (dsn DSN) String() (s string, err error) {
+	s = dsn.Username +
 		":" + dsn.Password +
 		"@" + dsn.Protocol +
 		"(" + dsn.Address +

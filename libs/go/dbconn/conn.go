@@ -26,52 +26,43 @@ func NewConn() *Conn {
 }
 
 // Get timeout context and cancel function for database operations.
-func (conn *Conn) Context() (context.Context, context.CancelFunc) {
+func (conn *Conn) Context() (ctx context.Context, cancel context.CancelFunc) {
 	return context.WithTimeout(context.Background(), conn.Timeout)
 }
 
 // Open database connection.
-func (conn *Conn) Open() error {
-	var err error
-
+func (conn *Conn) Open() (err error) {
 	str, err := conn.DSN.String()
 	if err != nil {
 		return err
 	}
 
 	conn.DB, err = sql.Open("mysql", str)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
 
 // Ping database.
-func (conn *Conn) Ping() error {
+func (conn *Conn) Ping() (err error) {
 	ctx, cancel := conn.Context()
 	defer cancel()
 
-	err := conn.DB.PingContext(ctx)
-	if err != nil {
-		return err
-	}
+	err = conn.DB.PingContext(ctx)
 
-	return nil
+	return err
 }
 
 // Check if database is available.
-func (conn *Conn) IsUp() (bool, error) {
-	err := conn.Ping()
+func (conn *Conn) IsUp() (isUp bool, err error) {
+	err = conn.Ping()
 	return err == nil, err
 }
 
 // Ping until database it is available.
-func (conn *Conn) Wait(timeout time.Duration) error {
+func (conn *Conn) Wait(timeout time.Duration) (err error) {
 	t := time.NewTicker(time.Second)
 	defer t.Stop()
 
-	var err error
 	for {
 		select {
 		case <-t.C:
@@ -86,12 +77,11 @@ func (conn *Conn) Wait(timeout time.Duration) error {
 }
 
 // Get database version string.
-func (conn *Conn) Version() (string, error) {
+func (conn *Conn) Version() (version string, err error) {
 	ctx, cancel := conn.Context()
 	defer cancel()
 
-	var version string
-	err := conn.DB.QueryRowContext(ctx, "SELECT VERSION()").Scan(&version)
+	err = conn.DB.QueryRowContext(ctx, "SELECT VERSION()").Scan(&version)
 	if err != nil {
 		return "", err
 	}
@@ -101,6 +91,6 @@ func (conn *Conn) Version() (string, error) {
 
 // Close database connection.  Preferably use `defer conn.Close()` after
 // `conn.Open()`.
-func (conn *Conn) Close() error {
+func (conn *Conn) Close() (err error) {
 	return conn.DB.Close()
 }
